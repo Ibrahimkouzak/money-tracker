@@ -18,25 +18,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import com.ibi.moneytracker.ui.viewmodel.DashboardViewModel
 import java.util.Locale
 
 @Composable
 fun DashboardScreen(
-    navController: NavHostController,
     viewModel: DashboardViewModel,
 ) {
     val totalMonthlyYearlyIncludedCost by viewModel.totalMonthlyYearlyIncludedCost.collectAsStateWithLifecycle()
     val totalMonthlyCost by viewModel.totalMonthlyCost.collectAsStateWithLifecycle()
     val totalOneTimeCost by viewModel.totalOneTimeCost.collectAsStateWithLifecycle() // Assuming you add this to the VM
 
-    Scaffold(
-    ) { paddingValues ->
+    Scaffold{ paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

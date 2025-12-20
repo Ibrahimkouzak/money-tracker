@@ -1,12 +1,6 @@
 package com.ibi.moneytracker.ui.screen
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.absolutePadding
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -22,9 +16,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -37,24 +28,19 @@ import com.ibi.moneytracker.ui.viewmodel.DashboardViewModelFactory
 
 enum class AppTab(val title: Int, val icon: ImageVector) {
     Dashboard(
-        title = R.string.dashboard,
-        icon = Icons.Default.Dashboard
+        title = R.string.dashboard, icon = Icons.Default.Dashboard
     ),
     Add(
-        title = R.string.add,
-        icon = Icons.Default.Add
+        title = R.string.add, icon = Icons.Default.Add
     ),
     ChartView(
-        title = R.string.chartView,
-        icon = Icons.Default.AddChart
+        title = R.string.chartView, icon = Icons.Default.AddChart
     ),
     Edit(
-        title = R.string.edit,
-        icon = Icons.Default.Edit
+        title = R.string.edit, icon = Icons.Default.Edit
     ),
     Expense(
-        title = R.string.expense,
-        icon = Icons.Default.Preview
+        title = R.string.expense, icon = Icons.Default.Preview
     );
 }
 
@@ -63,8 +49,7 @@ enum class AppTab(val title: Int, val icon: ImageVector) {
 fun MoneyTrackerAppBar(
     currentScreen: AppTab,
     canNavigateBack: Boolean,
-    navigateUp: () -> Unit,
-    modifier: Modifier = Modifier
+    navigateUp: () -> Unit
 ) {
     TopAppBar(
         title = { Text(stringResource(currentScreen.title)) },
@@ -77,15 +62,12 @@ fun MoneyTrackerAppBar(
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                 }
             }
-        }
-    )
+        })
 }
 
 @Composable
 fun BottomNavigationBar(
-    currentScreen: AppTab,
-    onTabSelected: (String) -> Unit,
-    modifier: Modifier = Modifier
+    currentScreen: AppTab, onTabSelected: (String) -> Unit, modifier: Modifier = Modifier
 ) {
     NavigationBar(modifier = modifier) {
         val navigationItems = listOf(AppTab.Dashboard, AppTab.Add, AppTab.Expense, AppTab.ChartView)
@@ -100,8 +82,7 @@ fun BottomNavigationBar(
                         imageVector = screen.icon,
                         contentDescription = stringResource(id = screen.title)
                     )
-                }
-            )
+                })
         }
     }
 }
@@ -111,8 +92,9 @@ fun NavigationScreen(
     navController: NavHostController = rememberNavController()
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
-        val currentScreen = AppTab.valueOf(
-        backStackEntry?.destination?.route?.replaceAfter("/", "")?.replace("/", "")?: AppTab.Dashboard.name
+    val currentScreen = AppTab.valueOf(
+        backStackEntry?.destination?.route?.replaceAfter("/", "")?.replace("/", "")
+            ?: AppTab.Dashboard.name
     )
 
     val app = LocalContext.current.applicationContext as MoneyTrackerApplication
@@ -121,30 +103,24 @@ fun NavigationScreen(
     val viewModel: DashboardViewModel = viewModel(
         factory = DashboardViewModelFactory(repository)
     )
-    Scaffold(
-        topBar = {
-            MoneyTrackerAppBar(
-                currentScreen = currentScreen,
-                canNavigateBack = navController.previousBackStackEntry != null,
-                navigateUp = { navController.navigateUp() },
-                modifier = Modifier
-            )
-        },
-        bottomBar = {
-            BottomNavigationBar(
-                currentScreen = currentScreen,
-                onTabSelected = { route ->
-                    navController.navigate(route) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
+    Scaffold(topBar = {
+        MoneyTrackerAppBar(
+            currentScreen = currentScreen,
+            canNavigateBack = navController.previousBackStackEntry != null,
+            navigateUp = { navController.navigateUp() }
+        )
+    }, bottomBar = {
+        BottomNavigationBar(
+            currentScreen = currentScreen, onTabSelected = { route ->
+                navController.navigate(route) {
+                    popUpTo(navController.graph.startDestinationId) {
+                        saveState = true
                     }
+                    launchSingleTop = true
+                    restoreState = true
                 }
-            )
-        }
-    ) { innerPadding ->
+            })
+    }) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = AppTab.Dashboard.name,
@@ -154,7 +130,6 @@ fun NavigationScreen(
         ) {
             composable(route = AppTab.Dashboard.name) {
                 DashboardScreen(
-                    navController = navController,
                     viewModel = viewModel
                 )
             }
@@ -171,14 +146,12 @@ fun NavigationScreen(
                 ChartView(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(dimensionResource(R.dimen.padding_medium)),
-                    viewModel = viewModel
+                        .padding(dimensionResource(R.dimen.padding_medium)), viewModel = viewModel
                 )
             }
             val editRoute = "${AppTab.Edit.name}/{expenseId}"
             composable(
-                route = editRoute,
-                arguments = listOf(navArgument("expenseId") {
+                route = editRoute, arguments = listOf(navArgument("expenseId") {
                     type = NavType.LongType
                 })
             ) { backStackEntry ->
@@ -197,8 +170,7 @@ fun NavigationScreen(
             }
             composable(route = AppTab.Expense.name) {
                 ExpensesScreen(
-                    navController = navController,
-                    viewModel = viewModel
+                    navController = navController, viewModel = viewModel
                 )
             }
         }

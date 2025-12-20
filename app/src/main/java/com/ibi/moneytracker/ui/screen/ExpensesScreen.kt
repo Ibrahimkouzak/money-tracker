@@ -4,8 +4,6 @@ import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,6 +15,7 @@ import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -167,6 +166,8 @@ fun ExpensesScreen(
 fun ExpenseItem(expense: Expense,
                 onEditClicked: () -> Unit,
                 onDeleteClicked: () -> Unit) {
+    var showMenu by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(100.dp),
@@ -214,18 +215,40 @@ fun ExpenseItem(expense: Expense,
                 .padding(top = 32.dp)
             )
 
-            Row(modifier = Modifier.align(Alignment.CenterEnd)) {
-                IconButton(onClick = onEditClicked) {
+            Box(modifier = Modifier.align(Alignment.CenterEnd)) {
+                IconButton(onClick = { showMenu = true }) {
                     Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit ${expense.name}"
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "More options"
                     )
                 }
-                IconButton(onClick = onDeleteClicked) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete ${expense.name}",
-                        tint = MaterialTheme.colorScheme.error
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Edit") },
+                        onClick = {
+                            showMenu = false
+                            onEditClicked()
+                        },
+                        leadingIcon = {
+                            Icon(Icons.Default.Edit, contentDescription = null)
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Delete") },
+                        onClick = {
+                            showMenu = false
+                            onDeleteClicked()
+                        },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
                     )
                 }
             }
