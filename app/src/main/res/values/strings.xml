@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Expenses Tracker</string>
+    <string name="add">New Expense</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="chartView">Chart View</string>
+    <string name="edit">Edit expense</string>
+    <string name="expense">Expenses View</string>
+    <string name="add_new_expense_title">Add new expense</string>
+    <string name="expense_name_label">Expense name</string>
+    <string name="date_picker_description">Date picker description</string>
+</resources>

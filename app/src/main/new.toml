@@ -1,0 +1,4 @@
+toml
+[plugins]
+# ... other plugins
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
