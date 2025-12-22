@@ -1,4 +1,4 @@
-package com.ibi.moneytracker.data
+package com.ibi.moneytracker.uiLayer.data
 
 enum class FilterType(val displayName: String) {
     ALL("ALL"),

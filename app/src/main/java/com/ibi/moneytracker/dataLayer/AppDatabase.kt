@@ -1,10 +1,12 @@
-package com.ibi.moneytracker.data
+package com.ibi.moneytracker.dataLayer
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.ibi.moneytracker.uiLayer.data.Converters
+import com.ibi.moneytracker.uiLayer.data.Expense
 
 @Database(entities = [Expense::class], version = 1, exportSchema = false)
 @TypeConverters(Converters::class)

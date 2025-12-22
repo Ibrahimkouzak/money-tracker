@@ -1,4 +1,4 @@
-package com.ibi.moneytracker.data
+package com.ibi.moneytracker.uiLayer.data
 
 enum class ExpenseCategory(val displayName: String) {
     FOOD("Food"),

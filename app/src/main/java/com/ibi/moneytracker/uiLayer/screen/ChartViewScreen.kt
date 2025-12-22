@@ -1,4 +1,4 @@
-package com.ibi.moneytracker.ui.screen
+package com.ibi.moneytracker.uiLayer.screen
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Canvas
@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,8 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ibi.moneytracker.data.ExpenseCategory
-import com.ibi.moneytracker.ui.viewmodel.DashboardViewModel
+import com.ibi.moneytracker.uiLayer.data.ExpenseCategory
+import com.ibi.moneytracker.uiLayer.viewmodel.ChartViewViewModel
 import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
 import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
 import com.patrykandpatrick.vico.compose.chart.Chart
@@ -42,14 +43,14 @@ import com.patrykandpatrick.vico.core.entry.ChartEntryModelProducer
 import com.patrykandpatrick.vico.core.entry.FloatEntry
 
 @Composable
-fun ChartView(modifier: Modifier, viewModel: DashboardViewModel) {
+fun ChartView(modifier: Modifier, viewModel: ChartViewViewModel) {
     val expensesByCategory by viewModel.expensesByCategory.collectAsStateWithLifecycle()
     val dailyExpenses by viewModel.dailyExpensesCurrentMonth.collectAsStateWithLifecycle()
 
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(24.dp),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 32.dp)
+        contentPadding = PaddingValues(bottom = 32.dp)
     ) {
         item {
             CategoryBarChart(
@@ -67,51 +68,6 @@ fun ChartView(modifier: Modifier, viewModel: DashboardViewModel) {
             DailyExpensesLineChart(
                 dailyExpenses = dailyExpenses,
                 modifier = modifier
-            )
-        }
-    }
-}
-
-@Composable
-fun DailyExpensesLineChart(dailyExpenses: Map<Int, Double>, modifier: Modifier = Modifier) {
-    val modelProducer = remember { ChartEntryModelProducer() }
-
-    LaunchedEffect(dailyExpenses) {
-        if (dailyExpenses.isNotEmpty()) {
-            val entries = dailyExpenses.entries
-                .sortedBy { it.key }
-                .map { (day, amount) ->
-                FloatEntry(x = day.toFloat(), y = amount.toFloat())
-            }
-            modelProducer.setEntries(entries)
-        }
-    }
-
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    ) {
-        Text(
-            "Daily Spending",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        ProvideChartStyle(chartStyle = m3ChartStyle()) {
-            Chart(
-                chart = lineChart(),
-                chartModelProducer = modelProducer,
-                startAxis = rememberStartAxis(
-                    valueFormatter = { value, _ -> "€%.0f".format(value) }
-                ),
-                bottomAxis = rememberBottomAxis(
-                    valueFormatter = { value, _ -> value.toInt().toString() },
-                    title = "Day of Month"
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(250.dp)
             )
         }
     }
@@ -154,6 +110,11 @@ fun CategoryBarChart(expensesByCategory: Map<ExpenseCategory, Double>, modifier:
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
+
+        if (expensesByCategory.values.sum() == 0.0) {
+            Text("No expenses available.", style = MaterialTheme.typography.bodyMedium)
+            return
+        }
 
         ProvideChartStyle(chartStyle = m3ChartStyle()) {
             Chart(
@@ -266,6 +227,55 @@ fun CategoryPieChart(expensesByCategory: Map<ExpenseCategory, Double>, modifier:
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun DailyExpensesLineChart(dailyExpenses: Map<Int, Double>, modifier: Modifier = Modifier) {
+    val modelProducer = remember { ChartEntryModelProducer() }
+
+    LaunchedEffect(dailyExpenses) {
+        if (dailyExpenses.isNotEmpty()) {
+            val entries = dailyExpenses.entries
+                .sortedBy { it.key }
+                .map { (day, amount) ->
+                FloatEntry(x = day.toFloat(), y = amount.toFloat())
+            }
+            modelProducer.setEntries(entries)
+        }
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Text(
+            "Daily Spending",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        if (dailyExpenses.isNotEmpty()) {
+            Text("No expenses available.", style = MaterialTheme.typography.bodyMedium)
+            return
+        }
+
+        ProvideChartStyle(chartStyle = m3ChartStyle()) {
+            Chart(
+                chart = lineChart(),
+                chartModelProducer = modelProducer,
+                startAxis = rememberStartAxis(
+                    valueFormatter = { value, _ -> "€%.0f".format(value) }
+                ),
+                bottomAxis = rememberBottomAxis(
+                    valueFormatter = { value, _ -> value.toInt().toString() },
+                    title = "Day of Month"
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+            )
         }
     }
 }
