@@ -1,6 +1,7 @@
 package com.ibi.moneytracker.uiLayer.screen
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -46,6 +47,8 @@ import com.patrykandpatrick.vico.core.entry.FloatEntry
 fun ChartView(modifier: Modifier, viewModel: ChartViewViewModel) {
     val expensesByCategory by viewModel.expensesByCategory.collectAsStateWithLifecycle()
     val dailyExpenses by viewModel.dailyExpensesCurrentMonth.collectAsStateWithLifecycle()
+
+    Log.d("ChartView", "dailyExpenses: $dailyExpenses")
 
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
@@ -256,7 +259,7 @@ fun DailyExpensesLineChart(dailyExpenses: Map<Int, Double>, modifier: Modifier =
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
-        if (dailyExpenses.isNotEmpty()) {
+        if (dailyExpenses.isEmpty()) {
             Text("No expenses available.", style = MaterialTheme.typography.bodyMedium)
             return
         }
