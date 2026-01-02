@@ -1,8 +1,8 @@
-package com.ibi.moneytracker.data
+package com.ibi.moneytracker.uiLayer.data
 
 enum class BillingCycle {
     WEEKLY,
     MONTHLY,
     YEARLY,
-    OneTimePayment
+    ONE_TIME
 }

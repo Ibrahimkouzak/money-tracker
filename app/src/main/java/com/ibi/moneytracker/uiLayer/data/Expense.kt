@@ -1,4 +1,4 @@
-package com.ibi.moneytracker.data
+package com.ibi.moneytracker.uiLayer.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

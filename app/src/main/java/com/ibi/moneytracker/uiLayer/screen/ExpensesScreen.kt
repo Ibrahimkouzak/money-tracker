@@ -1,6 +1,5 @@
-package com.ibi.moneytracker.ui.screen
+package com.ibi.moneytracker.uiLayer.screen
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,16 +38,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.ibi.moneytracker.data.BillingCycle
-import com.ibi.moneytracker.data.Expense
-import com.ibi.moneytracker.ui.viewmodel.DashboardViewModel
+import com.ibi.moneytracker.uiLayer.data.BillingCycle
+import com.ibi.moneytracker.uiLayer.data.Expense
+import com.ibi.moneytracker.uiLayer.viewmodel.ExpensesViewModel
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpensesScreen(
     navController: NavHostController,
-    viewModel: DashboardViewModel
+    viewModel: ExpensesViewModel
 ) {
     val expenses by viewModel.expensesList.collectAsStateWithLifecycle()
     val currentCycleFilter by viewModel.currentCycleFilter.collectAsStateWithLifecycle()
@@ -136,7 +135,6 @@ fun ExpensesScreen(
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Log.d("ExpensesScreen", "Expenses: $expenses")
             if (expenses.isEmpty()) {
                 Text(
                     text = "No expenses match the current filter criteria.",
@@ -198,7 +196,7 @@ fun ExpenseItem(expense: Expense,
                 BillingCycle.WEEKLY -> "/weekly"
                 BillingCycle.MONTHLY -> "/monthly"
                 BillingCycle.YEARLY -> "/yearly"
-                BillingCycle.OneTimePayment -> "/one time"
+                BillingCycle.ONE_TIME -> "/one time"
             }
 
             Text(
