@@ -1,4 +1,4 @@
-package com.ibi.moneytracker.ui.screen
+package com.ibi.moneytracker.uiLayer.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ibi.moneytracker.ui.viewmodel.DashboardViewModel
+import com.ibi.moneytracker.uiLayer.viewmodel.DashboardViewModel
 import java.util.Locale
 
 @Composable

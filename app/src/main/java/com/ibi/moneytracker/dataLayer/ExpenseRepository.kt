@@ -1,5 +1,6 @@
-package com.ibi.moneytracker.data
+package com.ibi.moneytracker.dataLayer
 
+import com.ibi.moneytracker.uiLayer.data.Expense
 import kotlinx.coroutines.flow.Flow
 
 class ExpenseRepository(private val dao: ExpenseDao) {

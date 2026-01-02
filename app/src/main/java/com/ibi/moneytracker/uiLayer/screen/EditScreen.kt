@@ -1,4 +1,4 @@
-package com.ibi.moneytracker.ui.screen
+package com.ibi.moneytracker.uiLayer.screen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,10 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -43,10 +40,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.ibi.moneytracker.data.BillingCycle
-import com.ibi.moneytracker.data.ExpenseCategory
-import com.ibi.moneytracker.ui.viewmodel.DashboardViewModel
+import com.ibi.moneytracker.uiLayer.data.BillingCycle
+import com.ibi.moneytracker.uiLayer.data.ExpenseCategory
+import com.ibi.moneytracker.uiLayer.screen.sharedUI.SelectOptionDropdown
+import com.ibi.moneytracker.uiLayer.viewmodel.AddEditViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -55,17 +54,17 @@ import java.util.Locale
 @Composable
 fun EditScreen(
     navController: NavHostController,
-    viewModel: DashboardViewModel,
+    viewModel: AddEditViewModel,
     expenseId: Int,
 ) {
-    val expense = viewModel.getExpenseById(expenseId)
+    val expenses by viewModel.expensesList.collectAsStateWithLifecycle()
+    val expense = remember(expenses) { expenses.find { it.id == expenseId } }
+
     var name by remember { mutableStateOf("") }
     var cost by remember { mutableStateOf("") }
     var selectedCycle by remember { mutableStateOf(BillingCycle.MONTHLY) }
     var selectedCategory by remember { mutableStateOf(null as ExpenseCategory?) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
-    var isCycleMenuExpanded by remember { mutableStateOf(false) }
-    var isCategoryMenuExpanded by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(expense) {
@@ -116,66 +115,22 @@ fun EditScreen(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true
                 )
-                ExposedDropdownMenuBox(
-                    expanded = isCycleMenuExpanded,
-                    onExpandedChange = { isCycleMenuExpanded = !isCycleMenuExpanded }
-                ) {
-                    OutlinedTextField(
-                        value = selectedCycle.name.lowercase().replaceFirstChar { it.titlecase() },
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Billing Cycle") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isCycleMenuExpanded) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = isCycleMenuExpanded,
-                        onDismissRequest = { isCycleMenuExpanded = false }
-                    ) {
-                        BillingCycle.entries.forEach { cycle ->
-                            DropdownMenuItem(
-                                text = { Text(cycle.name.lowercase().replaceFirstChar { it.titlecase() }) },
-                                onClick = {
-                                    selectedCycle = cycle
-                                    isCycleMenuExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-                ExposedDropdownMenuBox(
-                    expanded = isCategoryMenuExpanded,
-                    onExpandedChange = { isCategoryMenuExpanded = !isCategoryMenuExpanded }
-                ) {
-                    OutlinedTextField(
-                        value = selectedCategory?.name?.lowercase()?.replaceFirstChar { it.titlecase() } ?: "",
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Category") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isCategoryMenuExpanded) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = isCategoryMenuExpanded,
-                        onDismissRequest = { isCategoryMenuExpanded = false }
-                    ) {
-                        ExpenseCategory.entries.forEach { category ->
-                            DropdownMenuItem(
-                                text = { Text(category.name.lowercase().replaceFirstChar { it.titlecase() }) },
-                                onClick = {
-                                    selectedCategory = category
-                                    isCategoryMenuExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
+                SelectOptionDropdown(
+                    labelText = "Billing Cycle",
+                    options = BillingCycle.entries,
+                    selectedOption = selectedCycle,
+                    onOptionSelected = { selectedCycle = it },
+                    optionToString = {it.name.lowercase().replaceFirstChar { char -> char.titlecase() }}
+                )
+                SelectOptionDropdown(
+                    labelText = "Category",
+                    options = ExpenseCategory.entries,
+                    selectedOption = selectedCategory,
+                    onOptionSelected = { selectedCategory = it },
+                    optionToString = {it.displayName.lowercase().replaceFirstChar { char -> char.titlecase() }}
+                )
 
-                val friendlyFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy")
+                val friendlyFormatter = DateTimeFormatter.ofPattern("MMM, dd, yyyy")
                 Box {
                     OutlinedTextField(
                         value = selectedDate.format(friendlyFormatter),

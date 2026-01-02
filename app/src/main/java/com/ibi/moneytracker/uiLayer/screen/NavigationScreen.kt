@@ -1,4 +1,4 @@
-package com.ibi.moneytracker.ui.screen
+package com.ibi.moneytracker.uiLayer.screen
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -23,8 +23,11 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.ibi.moneytracker.MoneyTrackerApplication
 import com.ibi.moneytracker.R
-import com.ibi.moneytracker.ui.viewmodel.DashboardViewModel
-import com.ibi.moneytracker.ui.viewmodel.DashboardViewModelFactory
+import com.ibi.moneytracker.uiLayer.viewmodel.AddEditViewModel
+import com.ibi.moneytracker.uiLayer.viewmodel.ChartViewViewModel
+import com.ibi.moneytracker.uiLayer.viewmodel.DashboardViewModel
+import com.ibi.moneytracker.uiLayer.viewmodel.ExpensesViewModel
+import com.ibi.moneytracker.uiLayer.viewmodel.ViewModelFactory
 
 enum class AppTab(val title: Int, val icon: ImageVector) {
     Dashboard(
@@ -46,11 +49,7 @@ enum class AppTab(val title: Int, val icon: ImageVector) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MoneyTrackerAppBar(
-    currentScreen: AppTab,
-    canNavigateBack: Boolean,
-    navigateUp: () -> Unit
-) {
+fun MoneyTrackerAppBar(currentScreen: AppTab, canNavigateBack: Boolean, navigateUp: () -> Unit) {
     TopAppBar(
         title = { Text(stringResource(currentScreen.title)) },
         colors = TopAppBarDefaults.topAppBarColors(
@@ -66,9 +65,7 @@ fun MoneyTrackerAppBar(
 }
 
 @Composable
-fun BottomNavigationBar(
-    currentScreen: AppTab, onTabSelected: (String) -> Unit, modifier: Modifier = Modifier
-) {
+fun BottomNavigationBar(currentScreen: AppTab, onTabSelected: (String) -> Unit, modifier: Modifier = Modifier) {
     NavigationBar(modifier = modifier) {
         val navigationItems = listOf(AppTab.Dashboard, AppTab.Add, AppTab.Expense, AppTab.ChartView)
 
@@ -89,8 +86,7 @@ fun BottomNavigationBar(
 
 @Composable
 fun NavigationScreen(
-    navController: NavHostController = rememberNavController()
-) {
+    navController: NavHostController = rememberNavController()) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = AppTab.valueOf(
         backStackEntry?.destination?.route?.replaceAfter("/", "")?.replace("/", "")
@@ -100,9 +96,20 @@ fun NavigationScreen(
     val app = LocalContext.current.applicationContext as MoneyTrackerApplication
     val repository = remember { app.repository }
 
-    val viewModel: DashboardViewModel = viewModel(
-        factory = DashboardViewModelFactory(repository)
+    val dashboardViewModel: DashboardViewModel = viewModel(
+        factory = ViewModelFactory(repository)
     )
+    val addEditViewModel: AddEditViewModel = viewModel(
+        factory = ViewModelFactory(repository)
+    )
+    val expensesViewModel: ExpensesViewModel = viewModel(
+        factory = ViewModelFactory(repository)
+    )
+    val chartViewViewModel: ChartViewViewModel = viewModel(
+        factory = ViewModelFactory(repository)
+    )
+
+
     Scaffold(topBar = {
         MoneyTrackerAppBar(
             currentScreen = currentScreen,
@@ -130,7 +137,7 @@ fun NavigationScreen(
         ) {
             composable(route = AppTab.Dashboard.name) {
                 DashboardScreen(
-                    viewModel = viewModel
+                    viewModel = dashboardViewModel
                 )
             }
 
@@ -138,7 +145,7 @@ fun NavigationScreen(
                 AddScreen(
                     onNextButtonClicked = { navController.popBackStack() },
                     navController = navController,
-                    viewModel = viewModel
+                    viewModel = addEditViewModel
                 )
             }
 
@@ -146,7 +153,7 @@ fun NavigationScreen(
                 ChartView(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(dimensionResource(R.dimen.padding_medium)), viewModel = viewModel
+                        .padding(dimensionResource(R.dimen.padding_medium)), viewModel = chartViewViewModel
                 )
             }
             val editRoute = "${AppTab.Edit.name}/{expenseId}"
@@ -161,7 +168,7 @@ fun NavigationScreen(
                 if (expenseId != null) {
                     EditScreen(
                         expenseId = expenseId,
-                        viewModel = viewModel,
+                        viewModel = addEditViewModel,
                         navController = navController,
                     )
                 } else {
@@ -170,7 +177,7 @@ fun NavigationScreen(
             }
             composable(route = AppTab.Expense.name) {
                 ExpensesScreen(
-                    navController = navController, viewModel = viewModel
+                    navController = navController, viewModel = expensesViewModel
                 )
             }
         }

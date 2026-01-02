@@ -1,4 +1,4 @@
-package com.ibi.moneytracker.ui.screen
+package com.ibi.moneytracker.uiLayer.screen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,22 +12,19 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.navArgument
 import com.ibi.moneytracker.R
-import com.ibi.moneytracker.data.BillingCycle
-import com.ibi.moneytracker.data.ExpenseCategory
-import com.ibi.moneytracker.ui.viewmodel.DashboardViewModel
+import com.ibi.moneytracker.uiLayer.data.BillingCycle
+import com.ibi.moneytracker.uiLayer.data.ExpenseCategory
+import com.ibi.moneytracker.uiLayer.screen.sharedUI.SelectOptionDropdown
+import com.ibi.moneytracker.uiLayer.viewmodel.AddEditViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -36,7 +33,7 @@ import java.time.format.DateTimeFormatter
 fun AddScreen(
     navController: NavHostController,
     onNextButtonClicked: () -> Unit,
-    viewModel: DashboardViewModel,
+    viewModel: AddEditViewModel,
 ) {
     var name by remember { mutableStateOf("") }
     var cost by remember { mutableStateOf("") }
@@ -97,7 +94,7 @@ fun AddScreen(
                 optionToString = { it.displayName.lowercase().replaceFirstChar { char -> char.titlecase() } }
             )
 
-            val friendlyFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy")
+            val friendlyFormatter = DateTimeFormatter.ofPattern("MMM, dd, yyyy")
 
             Box {
                 OutlinedTextField(
@@ -171,76 +168,4 @@ fun AddScreen(
             DatePicker(state = datePickerState)
         }
     }
-}
-
-/**
- * --- IMPROVEMENT: A reusable, generic composable for dropdown menus ---
- * This reduces code duplication in AddScreen and can be used elsewhere.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun <T> SelectOptionDropdown(
-    labelText: String,
-    options: List<T>,
-    selectedOption: T?,
-    onOptionSelected: (T) -> Unit,
-    optionToString: (T) -> String = { it.toString() }
-) {
-    var isExpanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = isExpanded,
-        onExpandedChange = { isExpanded = !isExpanded },
-        modifier = Modifier.fillMaxWidth() // Ensure the box takes full width
-    ) {
-        // --- FIX: This is the ANCHOR (the clickable Text Field) ---
-        OutlinedTextField(
-            // Use the menuAnchor modifier here!
-            modifier = Modifier.fillMaxWidth().menuAnchor(),
-            value = selectedOption?.let(optionToString) ?: "",
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(labelText) },
-            // Use the standard ExposedDropdownMenu trailing icon
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
-        )
-
-        // --- This is the actual MENU that appears below the anchor ---
-        ExposedDropdownMenu(
-            expanded = isExpanded,
-            onDismissRequest = { isExpanded = false },
-        ) {
-            options.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(optionToString(option)) },
-                    onClick = {
-                        onOptionSelected(option)
-                        isExpanded = false
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-@Preview
-fun AddScreenPreview() {
-    val viewmodel : DashboardViewModel = viewModel()
-    val navController = NavHostController(LocalContext.current)
-    AddScreen(
-        navController = navController,
-        onNextButtonClicked = {
-            println("Next button clicked")
-        },
-        viewModel = viewmodel
-    )
-//    SelectOptionDropdown(
-//        labelText = "Billing cycle",
-//        options = BillingCycle.entries,
-//        selectedOption = BillingCycle.MONTHLY,
-//        onOptionSelected = {
-//            println("Selected option: $it")
-//        },
-//    )
 }
